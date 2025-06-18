@@ -1,0 +1,15 @@
+For creating / joining a room , 
+{
+    "type":"join",
+    "payload":{
+        "roomId":"<roomId>"
+    }
+}
+
+For sending a chat , 
+{
+    "type":"chat",
+    "payload":{
+        "message":"<message>"
+    }
+}
