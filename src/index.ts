@@ -5,6 +5,7 @@ const wss = new WebSocketServer({port:8080});
 interface User {
     socket:WebSocket;
     room:string;
+    name:string;
 }
 
 let allSockets:User[] = []
@@ -17,15 +18,19 @@ wss.on("connection",(socket)=>{
         if(parsedMessage.type==='join'){
             allSockets.push({
                 socket, 
-                room:parsedMessage.payload.roomId
+                room:parsedMessage.payload.roomId,
+                name:parsedMessage.payload.name || "Unknown"
             })
         }
         if(parsedMessage.type==='chat'){
-            const currentUserRoom = allSockets.find(x=>x.socket===socket).room;
-            
+            const currentUser = allSockets.find(x=>x.socket===socket);
+            if (!currentUser) return;
+            const currentUserRoom = currentUser.room;
+            const name = parsedMessage.payload.name || currentUser.name || "Unknown";
+            const msgObj = { name, message: parsedMessage.payload.message };
             for(let i=0; i<allSockets.length; i++){
                 if(allSockets[i].room === currentUserRoom){
-                    allSockets[i].socket.send(parsedMessage.payload.message);
+                    allSockets[i].socket.send(JSON.stringify(msgObj));
                 }
             }
         }
