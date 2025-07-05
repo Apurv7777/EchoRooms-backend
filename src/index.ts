@@ -40,33 +40,3 @@ wss.on("connection",(socket)=>{
         allSockets = allSockets.filter(user => user.socket !== socket);
     });
 })
-
-//-----------------------------------------------------------------------------------------------------------
-
-// import { WebSocket, WebSocketServer } from "ws";
-
-// const wss = new WebSocketServer({port:8080});
-
-// let userCount = 0;
-// let allSockets:WebSocket[] = []
-
-// wss.on("connection",(socket)=>{
-//     allSockets.push(socket);
-//     userCount=userCount+1;
-//     console.log(`User #${userCount} connected`);
-//     socket.on("message",(message)=>{
-//         console.log('Message received: ', message.toString());
-
-//         // setTimeout(()=>{
-//         //     socket.send(message.toString() + ': From server.');
-//         // },1000);
-
-//         // For creating broadcasting network
-//         for(let i=0; i<allSockets.length; i++){
-//             allSockets[i].send(message.toString() + ': From server.');
-//         }
-//     })
-//     socket.on('close',()=>{
-//         allSockets = allSockets.filter(x => x !== socket);
-//     })
-// })
