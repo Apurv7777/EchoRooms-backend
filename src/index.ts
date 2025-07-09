@@ -21,7 +21,11 @@ wss.on("connection",(socket)=>{
             const roomId = parsedMessage.payload.roomId;
             
             // Remove any existing connection from this same socket (user reconnecting)
-            allSockets = allSockets.filter(user => user.socket !== socket);
+            // Also remove any user with same name in the same room (prevent duplicates)
+            allSockets = allSockets.filter(user => 
+                user.socket !== socket && 
+                !(user.room === roomId && user.name === userName)
+            );
             
             allSockets.push({
                 socket, 
@@ -88,19 +92,27 @@ wss.on("connection",(socket)=>{
             // Remove user from the list
             allSockets = allSockets.filter(user => user.socket !== socket);
             
-            // Send complete user lists to all remaining users in the room
-            // Each user sees all users including themselves
-            for(let i = 0; i < allSockets.length; i++){
-                if(allSockets[i].room === roomId){
-                    const allUsers = allSockets
-                        .filter(user => user.room === roomId)
-                        .map(user => user.name);
-                    
-                    allSockets[i].socket.send(JSON.stringify({
-                        type: 'users',
-                        users: allUsers,
-                        currentUser: allSockets[i].name
-                    }));
+            // Check if room is now empty
+            const remainingUsersInRoom = allSockets.filter(user => user.room === roomId);
+            
+            if (remainingUsersInRoom.length === 0) {
+                // Room is empty, no need to send user updates
+                console.log(`Room ${roomId} is now empty`);
+            } else {
+                // Send complete user lists to all remaining users in the room
+                // Each user sees all users including themselves
+                for(let i = 0; i < allSockets.length; i++){
+                    if(allSockets[i].room === roomId){
+                        const allUsers = allSockets
+                            .filter(user => user.room === roomId)
+                            .map(user => user.name);
+                        
+                        allSockets[i].socket.send(JSON.stringify({
+                            type: 'users',
+                            users: allUsers,
+                            currentUser: allSockets[i].name
+                        }));
+                    }
                 }
             }
         }
